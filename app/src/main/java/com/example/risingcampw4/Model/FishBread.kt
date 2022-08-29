@@ -1,6 +1,6 @@
 package com.example.risingcampw4.Model
 
-class FishBread(var breadStatus: Int) {
+class FishBread(var breadStatus: Int = 0, var backBreadStatus: Int = 0, var isRedBean: Boolean = false, var isTurnOver: Boolean = false) {
     companion object {
         const val EMPTY_GRILL = 0
         const val RARE = 1

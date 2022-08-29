@@ -1,20 +1,21 @@
 package com.example.risingcampw4.Fragment
 
-import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import com.example.risingcampw4.Model.FishBread
+import com.example.risingcampw4.Model.FishBread.Companion.EMPTY_GRILL
+import com.example.risingcampw4.Model.FishBread.Companion.MEDIUM
+import com.example.risingcampw4.Model.FishBread.Companion.RARE
+import com.example.risingcampw4.Model.FishBread.Companion.WELL_DONE
 import com.example.risingcampw4.R
 import com.example.risingcampw4.databinding.FragmentGrillBinding
 
 class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::inflate) {
     private var grills = mutableListOf<FishBread>()
-    private var threads = mutableListOf<Thread>()
     private var grillImageViews = mutableListOf<ImageView>()
+    private var redBeanImageViews = mutableListOf<ImageView>()
+    private var redBeanCreamImageViews = mutableListOf<ImageView>()
+    private var isRedBeanBottle = false
 
     override fun initView() {
         super.initView()
@@ -24,20 +25,15 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
 
     private fun initData() {
         initGrills()
-        initThreads()
         initGrillsImageView()
+        initRedBeansImageView()
+        initRedBeanCreamsImageView()
         setOnClickListener()
     }
 
     private fun initGrills() {
         for (i in 0..8) {
-            grills.add(FishBread(0))
-        }
-    }
-
-    private fun initThreads() {
-        for (i in 0..8) {
-            threads.add(Thread())
+            grills.add(FishBread())
         }
     }
 
@@ -53,27 +49,93 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
         grillImageViews.add(binding.ivGrill9)
     }
 
+    private fun initRedBeansImageView() {
+        redBeanImageViews.add(binding.ivRedBeanPoint1)
+        redBeanImageViews.add(binding.ivRedBeanPoint2)
+        redBeanImageViews.add(binding.ivRedBeanPoint3)
+        redBeanImageViews.add(binding.ivRedBeanPoint4)
+        redBeanImageViews.add(binding.ivRedBeanPoint5)
+        redBeanImageViews.add(binding.ivRedBeanPoint6)
+        redBeanImageViews.add(binding.ivRedBeanPoint7)
+        redBeanImageViews.add(binding.ivRedBeanPoint8)
+        redBeanImageViews.add(binding.ivRedBeanPoint9)
+    }
+
+    private fun initRedBeanCreamsImageView() {
+        redBeanCreamImageViews.add(binding.ivRedBeanCream1)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream2)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream3)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream4)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream5)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream6)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream7)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream8)
+        redBeanCreamImageViews.add(binding.ivRedBeanCream9)
+    }
+
     private fun setOnClickListener() {
         for (i in 0..8) {
             grillImageViews[i].setOnClickListener {
-                startBake(i)
+                if (isRedBeanBottle) {
+                    if (!grills[i].isTurnOver && grills[i].breadStatus > 0) {
+                        addCream(i)
+                    }
+                } else {
+                    if (grills[i].breadStatus > 0 && !grills[i].isTurnOver) {
+                        backStartBake(i)
+                    } else {
+                        startBake(i)
+                    }
+                }
+            }
+        }
+
+        binding.ivRedBeanBottle.setOnClickListener {
+            isRedBeanBottle = !isRedBeanBottle
+            if (isRedBeanBottle) {
+                binding.ivRedBeanBottle.setBackgroundColor(resources.getColor(R.color.yellow))
+            } else {
+                binding.ivRedBeanBottle.setBackgroundColor(resources.getColor(R.color.white))
             }
         }
     }
 
-    // inferred type is Unit but Thread was expected
     private fun startBake(index: Int) {
         grills[index].breadStatus = 1
         changeGrillStatus(index)
         Thread {
             try {
-                Log.d("myLog", "thread")
                 while(grills[index].breadStatus in 1..3) {
-                    Thread.sleep(1000)
-                    grills[index].breadStatus++
+                    Thread.sleep(5000)
+                    if (!grills[index].isTurnOver) {
+                        grills[index].breadStatus++
+                        activity?.runOnUiThread {
+                            changeGrillStatus(index)
+                        }
+                    }
 
-                    activity?.runOnUiThread {
-                        changeGrillStatus(index)
+                }
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+    private fun backStartBake(index: Int) {
+        grills[index].backBreadStatus = 1
+        grills[index].isTurnOver = true
+        redBeanCreamImageViews[index].visibility = View.GONE
+        changeBackGrillStatus(index)
+        Thread {
+            try {
+                while(grills[index].backBreadStatus in 1..3) {
+                    Thread.sleep(5000)
+
+                    if(grills[index].isTurnOver) {
+                        grills[index].backBreadStatus++
+                        activity?.runOnUiThread {
+                            changeBackGrillStatus(index)
+                        }
                     }
                 }
             } catch (e: InterruptedException) {
@@ -83,12 +145,41 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
     }
 
     private fun changeGrillStatus(index: Int) {
+        if (grills[index].isTurnOver) {
+            return
+        }
         when(grills[index].breadStatus) {
-            0 -> grillImageViews[index].setImageResource(R.drawable.mold)
-            1 -> grillImageViews[index].setImageResource(R.drawable.rare)
-            2 -> grillImageViews[index].setImageResource(R.drawable.medium)
-            3 -> grillImageViews[index].setImageResource(R.drawable.well_done)
+            EMPTY_GRILL -> grillImageViews[index].setImageResource(R.drawable.mold)
+            RARE -> grillImageViews[index].setImageResource(R.drawable.rare)
+            MEDIUM -> grillImageViews[index].setImageResource(R.drawable.medium)
+            WELL_DONE -> grillImageViews[index].setImageResource(R.drawable.well_done)
             else -> grillImageViews[index].setImageResource(R.drawable.overcooked)
+        }
+        redBeanImageViews[index].visibility = View.GONE
+    }
+
+    private fun changeBackGrillStatus(index: Int) {
+        if (!grills[index].isTurnOver) {
+            return
+        }
+        when(grills[index].backBreadStatus) {
+            EMPTY_GRILL -> grillImageViews[index].setImageResource(R.drawable.mold)
+            RARE -> grillImageViews[index].setImageResource(R.drawable.rare)
+            MEDIUM -> grillImageViews[index].setImageResource(R.drawable.medium)
+            WELL_DONE -> grillImageViews[index].setImageResource(R.drawable.well_done)
+            else -> grillImageViews[index].setImageResource(R.drawable.overcooked)
+        }
+        if (grills[index].isRedBean) {
+            redBeanImageViews[index].visibility = View.VISIBLE
+        }
+    }
+
+    private fun addCream(index: Int) {
+        if (!grills[index].isTurnOver && grills[index].breadStatus > 0) {
+            grills[index].isRedBean = true
+            redBeanCreamImageViews[index].visibility = View.VISIBLE
+            binding.ivRedBeanBottle.setBackgroundColor(resources.getColor(R.color.white))
+            isRedBeanBottle = !isRedBeanBottle
         }
     }
 }

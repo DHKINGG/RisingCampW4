@@ -14,11 +14,12 @@
         android:layout_weight="1"
         android:background="@color/black"/>
 
+    <!--  Fragment를 넣기위한 뷰  -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fm_container_grill"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:name="com.example.risingcampw4.Fragment.GrillFragment"/>
 
 </LinearLayout>
