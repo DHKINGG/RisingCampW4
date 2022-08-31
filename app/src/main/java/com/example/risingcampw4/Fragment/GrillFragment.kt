@@ -3,11 +3,13 @@ package com.example.risingcampw4.Fragment
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.lifecycle.ViewModelProvider
 import com.example.risingcampw4.Model.FishBread
 import com.example.risingcampw4.Model.FishBread.Companion.EMPTY_GRILL
 import com.example.risingcampw4.Model.FishBread.Companion.MEDIUM
 import com.example.risingcampw4.Model.FishBread.Companion.RARE
 import com.example.risingcampw4.Model.FishBread.Companion.WELL_DONE
+import com.example.risingcampw4.Model.FragmentViewModel
 import com.example.risingcampw4.R
 import com.example.risingcampw4.databinding.FragmentGrillBinding
 
@@ -17,8 +19,7 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
     private var redBeanImageViews = mutableListOf<ImageView>()  // 붕어빵 눈 이미지뷰 배열
     private var redBeanCreamImageViews = mutableListOf<ImageView>() // 붕어빵 위의 크림 이미뷰 배열
     private var isRedBeanBottle = false // 팥 병 선택 여부
-    private var score = 0   // 점수
-    private var heart = 5   // 목숨 개수
+    lateinit var viewModel: FragmentViewModel
 
     override fun initView() {
         super.initView()
@@ -27,11 +28,16 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
     }
 
     private fun initData() {
+        initViewModel()
         initGrills()
         initGrillsImageView()
         initRedBeansImageView()
         initRedBeanCreamsImageView()
         setOnClickListener()
+    }
+
+    private fun initViewModel() {
+        viewModel = ViewModelProvider(requireActivity())[FragmentViewModel::class.java]
     }
 
     private fun initGrills() {
@@ -112,7 +118,7 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
             try {
                 while(grills[index].breadStatus in 1..3) {
                     Thread.sleep(5000)
-                    if (!grills[index].isTurnOver) {
+                    if (!grills[index].isTurnOver && grills[index].breadStatus > EMPTY_GRILL) {
                         grills[index].breadStatus++
                         activity?.runOnUiThread {
                             changeGrillStatus(index)
@@ -137,7 +143,7 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
                 while(grills[index].backBreadStatus in 1..3) {
                     Thread.sleep(5000)
 
-                    if(grills[index].isTurnOver) {
+                    if(grills[index].isTurnOver && grills[index].backBreadStatus > EMPTY_GRILL) {
                         grills[index].backBreadStatus++
                         activity?.runOnUiThread {
                             changeBackGrillStatus(index)
@@ -192,18 +198,14 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
     }
 
     private fun takeOutBread(index: Int) {
-        if (grills[index].breadStatus == WELL_DONE && grills[index].backBreadStatus == WELL_DONE && grills[index].isRedBean) {
-            score += 10
-        } else {
-            heart -= 1
-        }
+        val isSuccess = grills[index].breadStatus == WELL_DONE && grills[index].backBreadStatus == WELL_DONE && grills[index].isRedBean
 
         clearBread(index)
         grillImageViews[index].setImageResource(R.drawable.mold)
         redBeanCreamImageViews[index].visibility = View.GONE
         redBeanImageViews[index].visibility = View.GONE
 
-        Log.d("myLog", "score = ${score}, heart = ${heart}")
+        viewModel.sendMessage(isSuccess)
     }
 
     private fun clearBread(index: Int) {

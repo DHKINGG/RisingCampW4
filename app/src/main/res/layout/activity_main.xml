@@ -8,11 +8,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <View
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fm_container_score"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/black"/>
+        android:name="com.example.risingcampw4.Fragment.ScoreFragment"/>
 
     <!--  Fragment를 넣기위한 뷰  -->
     <androidx.fragment.app.FragmentContainerView
