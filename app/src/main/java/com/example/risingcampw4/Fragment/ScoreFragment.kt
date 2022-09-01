@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.risingcampw4.Model.ActivityViewModel
 import com.example.risingcampw4.Model.FragmentViewModel
 import com.example.risingcampw4.R
 import com.example.risingcampw4.databinding.FragmentGrillBinding
@@ -15,12 +16,15 @@ import com.example.risingcampw4.databinding.FragmentScoreBinding
 class ScoreFragment : BaseFragment<FragmentScoreBinding>(FragmentScoreBinding::inflate) {
     private var score = 0
     private var heart = 3
+    lateinit var activityViewModel: ActivityViewModel
 
     override fun initView() {
         super.initView()
 
-        val viewModel = ViewModelProvider(requireActivity())[FragmentViewModel::class.java]
-        viewModel.message.observe(viewLifecycleOwner, Observer { getFishBread(it) })
+        activityViewModel = ViewModelProvider(requireActivity())[ActivityViewModel::class.java]
+
+        val fragmentViewModel = ViewModelProvider(requireActivity())[FragmentViewModel::class.java]
+        fragmentViewModel.message.observe(viewLifecycleOwner, Observer { getFishBread(it) })
     }
 
     private fun getFishBread(isSuccess: Boolean) {
@@ -34,7 +38,7 @@ class ScoreFragment : BaseFragment<FragmentScoreBinding>(FragmentScoreBinding::i
                 2 -> binding.ivHeart2.visibility = View.GONE
                 1 -> binding.ivHeart3.visibility = View.GONE
                 else -> {
-                    // 게임오버
+                    activityViewModel.sendMessage(true)
                 }
             }
             heart--
