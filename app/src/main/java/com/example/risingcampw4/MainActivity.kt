@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         val viewModel = ViewModelProvider(this)[ActivityViewModel::class.java]
         viewModel.message.observe(this, Observer { showGameOver() })
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.can_t_defeat_airman)
+        mediaPlayer = MediaPlayer.create(this, R.raw.bgm)
         mediaPlayer.isLooping = true
         mediaPlayer.start()
     }
