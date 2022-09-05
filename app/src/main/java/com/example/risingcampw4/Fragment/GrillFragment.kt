@@ -21,6 +21,7 @@ class GrillFragment : BaseFragment<FragmentGrillBinding>(FragmentGrillBinding::i
     private var isRedBeanBottle = false // 팥 병 선택 여부
     lateinit var viewModel: FragmentViewModel
 
+
     override fun initView() {
         super.initView()
 

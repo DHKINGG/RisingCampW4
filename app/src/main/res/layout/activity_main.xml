@@ -15,7 +15,7 @@
         android:layout_weight="1"
         android:name="com.example.risingcampw4.Fragment.ScoreFragment"/>
 
-    <!--  Fragment를 넣기위한 뷰  -->
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fm_container_grill"
         android:layout_width="match_parent"
